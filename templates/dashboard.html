@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PocketSmart{% endblock %}
+{% block content %}
+<section class="dashboard-head">
+  <div><span class="eyebrow">YOUR POCKETSMART</span><h1>Hello, {{ user.username }}.</h1><p>Review your saved budget plans or start a new one.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('home') }}#features">New Plan</a>
+</section>
+
+<section class="dashboard-grid">
+  <a class="dash-card" href="{{ url_for('planner', planner='home') }}"><span>⌂</span><h3>Home Interior</h3><p>Plan furniture, decor and room improvements.</p></a>
+  <a class="dash-card" href="{{ url_for('planner', planner='party') }}"><span>♟</span><h3>Party</h3><p>Balance venue, food, decor and entertainment.</p></a>
+  <a class="dash-card" href="{{ url_for('planner', planner='jewelry') }}"><span>◇</span><h3>Jewellery</h3><p>Build a purchase plan around your budget.</p></a>
+</section>
+
+<section class="saved-section">
+  <div class="section-heading left"><span class="eyebrow">HISTORY</span><h2>Saved Plans</h2></div>
+  <div id="savedPlans" class="saved-grid"><div class="loading compact"><div class="spinner"></div><p>Loading…</p></div></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadPlans() {
+  const wrap = document.getElementById("savedPlans");
+  const res = await fetch("/api/plans");
+  const plans = await res.json();
+  if (!plans.length) {
+    wrap.innerHTML = `<div class="empty-card"><div class="spark">✦</div><h3>No saved plans yet</h3><p>Create a planner recommendation and it will appear here.</p></div>`;
+    return;
+  }
+  wrap.innerHTML = plans.map(p => `
+    <article class="saved-card">
+      <div class="saved-icon">${p.planner_type === "home" ? "⌂" : p.planner_type === "party" ? "♟" : "◇"}</div>
+      <div><span class="eyebrow">${escapeHtml(p.planner_type)}</span><h3>${escapeHtml(p.title)}</h3><p>Budget: ₹${Number(p.budget).toLocaleString("en-IN")}</p><small>${new Date(p.created_at).toLocaleString()}</small></div>
+    </article>`).join("");
+}
+function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+loadPlans();
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}PocketSmart — AI Budget Planning{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <span class="eyebrow">SMART MONEY, SIMPLIFIED</span>
+      <h1>AI-Powered Budget Planning for Everyday Needs</h1>
+      <p>Make smarter financial decisions with personalized budget recommendations for home interiors, parties, and jewellery purchases.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ url_for('signup') }}">Get Started <span>→</span></a>
+        <a class="btn btn-light" href="#features">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-orb" aria-hidden="true">
+      <div class="orb-card"><span>AI</span><strong>₹ 50,000</strong><small>planned budget</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="section-heading">
+    <span class="eyebrow">PLANNERS</span>
+    <h2>Our Smart Budget Planners</h2>
+    <p>Discover how PocketSmart helps you make better financial decisions across different areas of your life.</p>
+  </div>
+  <div class="planner-grid">
+    <a class="planner-card" href="{{ url_for('planner', planner='home') }}">
+      <div class="card-icon">⌂</div>
+      <div class="card-body">
+        <h3>Home Interior Budget Planner</h3>
+        <p>Get personalized recommendations for furniture, lighting, decor and more based on your budget and style.</p>
+        <span class="card-link">Plan my home →</span>
+      </div>
+    </a>
+    <a class="planner-card" href="{{ url_for('planner', planner='party') }}">
+      <div class="card-icon">♟</div>
+      <div class="card-body">
+        <h3>Party Budget Planner</h3>
+        <p>Plan your perfect event with smart budget suggestions for food, venue, decor and entertainment.</p>
+        <span class="card-link">Plan my party →</span>
+      </div>
+    </a>
+    <a class="planner-card" href="{{ url_for('planner', planner='jewelry') }}">
+      <div class="card-icon">◇</div>
+      <div class="card-body">
+        <h3>Jewellery Budget Planner</h3>
+        <p>Find the right jewellery plan for any occasion with options based on your style, preferences and available budget.</p>
+        <span class="card-link">Plan jewellery →</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section class="trust-section" id="testimonials">
+  <div class="section-heading">
+    <span class="eyebrow">REAL STORIES</span>
+    <h2>What Our Users Say</h2>
+    <p>Simple planning experiences designed around everyday spending decisions.</p>
+  </div>
+  <div class="testimonial-grid">
+    <article class="testimonial"><p>“PocketSmart helped me plan my new apartment without breaking the bank. The recommendations were practical and easy to follow.”</p><div><strong>Sarah K.</strong><span>Home Owner</span></div></article>
+    <article class="testimonial"><p>“Planning my daughter's birthday party was so much easier with the budget planner. I got a clear breakdown without the guesswork.”</p><div><strong>Michael R.</strong><span>Parent</span></div></article>
+    <article class="testimonial"><p>“The jewellery planner gave me a simple way to compare what I could afford while keeping the total budget visible.”</p><div><strong>Priya M.</strong><span>Fashion Enthusiast</span></div></article>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div>
+    <span class="eyebrow">READY TO PLAN?</span>
+    <h2>Ready to Optimize Your Budget?</h2>
+    <p>Join PocketSmart today and start making smarter financial decisions across all areas of your life.</p>
+    <div class="hero-actions">
+      <a class="btn btn-light" href="{{ url_for('login') }}">Sign In</a>
+      <a class="btn btn-soft" href="{{ url_for('signup') }}">Create Account</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}{{ planner_name }} Budget Planner — PocketSmart{% endblock %}
+{% block content %}
+<section class="planner-hero">
+  <div>
+    <span class="eyebrow">POCKETSMART PLANNER</span>
+    <h1>{{ planner_name }} Budget Planner</h1>
+    <p>Tell PocketSmart what you need, and Gemini will turn your budget into a practical plan.</p>
+  </div>
+</section>
+
+<section class="planner-layout">
+  <form id="plannerForm" class="planner-form">
+    <input type="hidden" id="plannerType" value="{{ planner }}">
+    <div class="form-section">
+      <h2>Your budget</h2>
+      <p class="muted">Start with the maximum amount you want to spend.</p>
+      <label>Budget (₹)<input id="budget" type="number" min="0" step="500" placeholder="50000" required></label>
+    </div>
+
+    <div class="form-section">
+      <h2>Preferences</h2>
+      <label>Location<input id="location" type="text" placeholder="Bengaluru, Chennai, etc."></label>
+      <label>Style / priority
+        <select id="style">
+          <option value="balanced">Balanced</option>
+          <option value="premium">Premium feel</option>
+          <option value="minimal">Minimal & practical</option>
+          <option value="value">Maximum value</option>
+        </select>
+      </label>
+      {% if planner == "party" %}
+      <label>Number of guests<input id="party_size" type="number" min="1" placeholder="30"></label>
+      {% endif %}
+      {% if planner == "home" %}
+      <label>Room / project<input id="room" type="text" placeholder="Living room"></label>
+      {% endif %}
+      {% if planner == "jewelry" %}
+      <label>Occasion<input id="occasion" type="text" placeholder="Wedding / gift / everyday"></label>
+      {% endif %}
+      <label>Extra notes<textarea id="notes" rows="4" placeholder="Tell the AI anything important about your plan..."></textarea></label>
+    </div>
+
+    <button class="btn btn-primary full" type="submit" id="generateBtn">Generate AI Budget Plan <span>✦</span></button>
+    <p class="muted small">Your API key stays on the Python server. The browser never receives it.</p>
+  </form>
+
+  <aside class="result-panel" id="resultPanel">
+    <div class="result-empty">
+      <div class="spark">✦</div>
+      <h2>Your personalized plan</h2>
+      <p>Fill the form and click <strong>Generate AI Budget Plan</strong>. Your recommendation will appear here.</p>
+    </div>
+  </aside>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const plannerForm = document.getElementById("plannerForm");
+plannerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("generateBtn");
+  const panel = document.getElementById("resultPanel");
+  btn.disabled = true;
+  btn.innerHTML = "Thinking with Gemini…";
+  panel.innerHTML = `<div class="loading"><div class="spinner"></div><h2>Building your plan</h2><p>Checking your budget and priorities…</p></div>`;
+
+  const payload = {
+    planner: document.getElementById("plannerType").value,
+    budget: Number(document.getElementById("budget").value || 0),
+    location: document.getElementById("location").value.trim(),
+    style: document.getElementById("style").value,
+    notes: document.getElementById("notes").value.trim()
+  };
+  for (const id of ["party_size","room","occasion"]) {
+    const el = document.getElementById(id);
+    if (el) payload[id] = el.value.trim();
+  }
+
+  try {
+    const res = await fetch("/api/recommend", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not generate a plan.");
+    renderResult(data, panel);
+  } catch (err) {
+    panel.innerHTML = `<div class="error-box"><h2>Could not generate the plan</h2><p>${escapeHtml(err.message)}</p><button class="btn btn-light" onclick="location.reload()">Try again</button></div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Generate AI Budget Plan <span>✦</span>";
+  }
+});
+
+function renderResult(data, panel) {
+  const items = Array.isArray(data.items) ? data.items : [];
+  const mode = data.mode === "gemini" ? "Gemini AI" : "Local fallback";
+  panel.innerHTML = `
+    <div class="result-head">
+      <div><span class="eyebrow">${mode}</span><h2>Your PocketSmart plan</h2></div>
+      <span class="status-pill">${data.model || "Ready"}</span>
+    </div>
+    <p class="result-summary">${escapeHtml(data.summary || "")}</p>
+    <div class="recommendations">
+      ${items.map((item) => `
+        <article class="recommendation">
+          <div><span class="check">✓</span><div><h3>${escapeHtml(item.name || "Recommendation")}</h3><p>${escapeHtml(item.reason || "")}</p></div></div>
+          <strong>₹${Number(item.estimate || 0).toLocaleString("en-IN")}</strong>
+        </article>
+      `).join("")}
+    </div>
+    <div class="tip"><strong>Smart tip</strong><p>${escapeHtml(data.tip || "")}</p></div>
+    ${data.note ? `<p class="small muted">${escapeHtml(data.note)}</p>` : ""}
+    <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+  `;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+POCKETSMART AI — START HERE
+
+1) Open this folder in VS Code.
+2) Open Terminal > New Terminal.
+3) Run these commands in PowerShell:
+
+py -3.14 --version
+py -3.14 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+notepad .env
+
+4) Put your Gemini API key into .env:
+GEMINI_API_KEY=YOUR_REAL_GEMINI_API_KEY
+
+5) Save .env, then run:
+python app.py
+
+6) Open:
+http://127.0.0.1:5000
+
+If PowerShell blocks activation:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+
+If you prefer CMD:
+py -3.14 -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+copy .env.example .env
+notepad .env
+python app.py
+
+Do NOT put the real API key in JavaScript or commit .env.

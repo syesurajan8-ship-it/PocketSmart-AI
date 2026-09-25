@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ "Create Your Account" if mode == "signup" else "Welcome Back" }} — PocketSmart{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-brand">PocketSmart</div>
+    <h1>{{ "Create Your Account" if mode == "signup" else "Welcome Back" }}</h1>
+    <p class="muted">{{ "Create an account to save your budget plans." if mode == "signup" else "Sign in to view your saved budget plans." }}</p>
+
+    <form id="authForm" data-mode="{{ mode }}">
+      {% if mode == "signup" %}
+      <label>Username<input id="username" type="text" autocomplete="username" placeholder="Choose a username" required></label>
+      <label>Email<input id="email" type="email" autocomplete="email" placeholder="Enter your email" required></label>
+      {% else %}
+      <label>Username or email<input id="identity" type="text" autocomplete="username" placeholder="Enter username or email" required></label>
+      {% endif %}
+      <label>Password<input id="password" type="password" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" placeholder="Enter your password" required></label>
+      {% if mode == "signup" %}
+      <label>Confirm Password<input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm your password" required></label>
+      {% endif %}
+      <button class="btn btn-primary full" type="submit">{{ "Create Account" if mode == "signup" else "Sign In" }}</button>
+      <p id="formError" class="form-error"></p>
+    </form>
+
+    <p class="switch-auth">
+      {% if mode == "signup" %}Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+      {% else %}Don't have an account? <a href="{{ url_for('signup') }}">Create one</a>{% endif %}
+    </p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById("authForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const mode = e.currentTarget.dataset.mode;
+  const error = document.getElementById("formError");
+  error.textContent = "";
+  const payload = mode === "signup"
+    ? {
+        username: document.getElementById("username").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+        confirmPassword: document.getElementById("confirmPassword").value
+      }
+    : {
+        identity: document.getElementById("identity").value.trim(),
+        password: document.getElementById("password").value
+      };
+
+  if (mode === "signup" && payload.password !== payload.confirmPassword) {
+    error.textContent = "Passwords do not match.";
+    return;
+  }
+
+  const res = await fetch(mode === "signup" ? "/api/signup" : "/api/login", {
+    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok) { error.textContent = data.error || "Something went wrong."; return; }
+  window.location.href = data.redirect;
+});
+</script>
+{% endblock %}
